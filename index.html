@@ -17,12 +17,16 @@
           :key="item.id"
         />
       </div>
-      <button @click="loadGiphies">Load More!</button>
+      <button v-if="giphyList.length < maxViewable" @click="loadGiphies">Load More!</button>
+      <p v-else>
+        Maximum number loaded.
+      </p>
     </div>
 
     <script type="text/javascript">
       const START_BATCH_SIZE = 10;
       const LOAD_BATCH_SIZE = 5;
+      const MAX_VIEWABLE = 100;
       const API_KEY = 'YfKFvEqlqmymcVI88PMbrlzG8QwAoIhh';
       const TRENDING_URL = `https://api.giphy.com/v1/gifs/trending?api_key=${API_KEY}`;
 
@@ -35,6 +39,7 @@
         el: '#app',
         data: {
           offset: START_BATCH_SIZE,
+          maxViewable: MAX_VIEWABLE,
           giphyList: [],
         },
         methods: {
@@ -44,7 +49,8 @@
               .then(response => {
                 const existingIds = new Set(this.giphyList.map(giphy => giphy.id));
                 response.data.data.forEach(giphy => {
-                  if (!existingIds.has(giphy.id)) {
+                  // TODO: use a more elegant way
+                  if (this.giphyList.length < MAX_VIEWABLE && !existingIds.has(giphy.id)) {
                     this.giphyList.push(giphy);
                   }
                 })
