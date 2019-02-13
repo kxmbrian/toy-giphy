@@ -2,27 +2,69 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>Trending Giphies!</title>
+    <title>Trending on GIPHY</title>
 
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <style>
+      #app {
+        margin: 5%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-family:
+          BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,
+          Droid Sans,Helvetica Neue,Helvetica,Arial,sans-serif;
+      }
+      #title {
+        margin-bottom: 50px;
+        font-size: 3rem;
+      }
+      #gifs {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      #footer {
+        margin-top: 100px;
+        display: flex;
+        justify-content: center;
+      }
+      #add-more-button {
+        color: #fff;
+        background-color: #0f77ea;
+        border-color: transparent;
+        padding: calc(.375em - 1px) .75em;
+        height: 2.25em;
+        font-size: 1rem;
+        border-radius: 4px;
+      }
+    </style>
   </head>
   <body>
     <div id="app">
-      <h1>Trending Giphies!</h1>
-      <div>
+      <div id="title">Trending on GIPHY</div>
+      <div id="gifs">
         <giphy-item
           v-for="item in giphyList"
           :item="item"
           :key="item.id"
         />
       </div>
-      <button v-if="giphyList.length < maxViewable" @click="loadGiphies" :disabled='loading'>
-        Load More!
-      </button>
-      <p v-else>
-        Maximum number loaded.
-      </p>
+      <div id="footer">
+        <button
+          id="add-more-button"
+          v-if="giphyList.length < maxViewable"
+          @click="loadGiphies"
+          :disabled='loading'
+        >
+          Load More!
+        </button>
+        <p v-else>
+          Maximum number loaded.
+        </p>
+      </div>
     </div>
 
     <script type="text/javascript">
