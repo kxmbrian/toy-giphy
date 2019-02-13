@@ -21,7 +21,8 @@
     </div>
 
     <script type="text/javascript">
-      const BATCH_SIZE = 10;
+      const START_BATCH_SIZE = 10;
+      const LOAD_BATCH_SIZE = 5;
       const API_KEY = 'YfKFvEqlqmymcVI88PMbrlzG8QwAoIhh';
       const TRENDING_URL = `https://api.giphy.com/v1/gifs/trending?api_key=${API_KEY}`;
 
@@ -33,20 +34,27 @@
       var app = new Vue({
         el: '#app',
         data: {
+          offset: START_BATCH_SIZE,
           giphyList: [],
         },
         methods: {
           loadGiphies: function () {
             axios
-              .get(`${TRENDING_URL}&limit=${BATCH_SIZE}&offset=${this.giphyList.length}`)
-              .then(response => (
-                this.giphyList = this.giphyList.concat(response.data.data)
-              ))
+              .get(`${TRENDING_URL}&limit=${LOAD_BATCH_SIZE}&offset=${this.offset}`)
+              .then(response => {
+                const existingIds = new Set(this.giphyList.map(giphy => giphy.id));
+                response.data.data.forEach(giphy => {
+                  if (!existingIds.has(giphy.id)) {
+                    this.giphyList.push(giphy);
+                  }
+                })
+                this.offset += LOAD_BATCH_SIZE;
+              })
           },
         },
         mounted () {
           axios
-            .get(`${TRENDING_URL}&limit=${BATCH_SIZE}`)
+            .get(`${TRENDING_URL}&limit=${START_BATCH_SIZE}`)
             .then(response => (this.giphyList = response.data.data))
         }
       })
