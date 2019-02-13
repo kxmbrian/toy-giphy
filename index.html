@@ -17,11 +17,13 @@
           :key="item.id"
         />
       </div>
+      <button @click="loadGiphies">Load More!</button>
     </div>
 
     <script type="text/javascript">
       const BATCH_SIZE = 10;
       const API_KEY = 'YfKFvEqlqmymcVI88PMbrlzG8QwAoIhh';
+      const TRENDING_URL = `https://api.giphy.com/v1/gifs/trending?api_key=${API_KEY}`;
 
       Vue.component('giphy-item', {
         props: ['item'],
@@ -33,9 +35,18 @@
         data: {
           giphyList: [],
         },
+        methods: {
+          loadGiphies: function () {
+            axios
+              .get(`${TRENDING_URL}&limit=${BATCH_SIZE}&offset=${this.giphyList.length}`)
+              .then(response => (
+                this.giphyList = this.giphyList.concat(response.data.data)
+              ))
+          },
+        },
         mounted () {
           axios
-            .get(`https://api.giphy.com/v1/gifs/trending?limit=${BATCH_SIZE}&api_key=${API_KEY}`)
+            .get(`${TRENDING_URL}&limit=${BATCH_SIZE}`)
             .then(response => (this.giphyList = response.data.data))
         }
       })
