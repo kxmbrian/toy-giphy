@@ -17,7 +17,9 @@
           :key="item.id"
         />
       </div>
-      <button v-if="giphyList.length < maxViewable" @click="loadGiphies">Load More!</button>
+      <button v-if="giphyList.length < maxViewable" @click="loadGiphies" :disabled='loading'>
+        Load More!
+      </button>
       <p v-else>
         Maximum number loaded.
       </p>
@@ -40,10 +42,12 @@
         data: {
           offset: START_BATCH_SIZE,
           maxViewable: MAX_VIEWABLE,
+          loading: false,
           giphyList: [],
         },
         methods: {
           loadGiphies: function () {
+            this.loading = true;
             axios
               .get(`${TRENDING_URL}&limit=${LOAD_BATCH_SIZE}&offset=${this.offset}`)
               .then(response => {
@@ -55,13 +59,22 @@
                   }
                 })
                 this.offset += LOAD_BATCH_SIZE;
+                this.loading = false;
+              })
+              .catch(error => {
+                // TODO: handle errors
+                this.loading = false;
               })
           },
         },
         mounted () {
+          this.loading = true;
           axios
             .get(`${TRENDING_URL}&limit=${START_BATCH_SIZE}`)
-            .then(response => (this.giphyList = response.data.data))
+            .then(response => {
+              this.giphyList = response.data.data;
+              this.loading = false;
+            })
         }
       })
     </script>
