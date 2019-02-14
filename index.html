@@ -93,10 +93,8 @@
             axios
               .get(`${TRENDING_URL}&limit=${LOAD_BATCH_SIZE}&offset=${this.offset}`)
               .then(response => {
-                const existingIds = new Set(this.giphyList.map(giphy => giphy.id));
                 response.data.data.forEach(giphy => {
-                  // TODO: use a more elegant way
-                  if (this.giphyList.length < MAX_VIEWABLE && !existingIds.has(giphy.id)) {
+                  if (this.giphyList.length < MAX_VIEWABLE && !this.existingIds.has(giphy.id)) {
                     this.giphyList.push(giphy);
                   }
                 })
@@ -108,6 +106,11 @@
                 this.loading = false;
               })
           },
+        },
+        computed: {
+          existingIds: function () {
+            return new Set(this.giphyList.map(giphy => giphy.id));
+          }
         },
         mounted () {
           this.loading = true;
