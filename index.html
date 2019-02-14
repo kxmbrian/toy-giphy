@@ -56,7 +56,7 @@
         <button
           id="add-more-button"
           v-if="giphyList.length < maxViewable"
-          @click="loadGiphies"
+          @click="moreGiphies"
           :disabled='loading'
         >
           Load More!
@@ -88,24 +88,26 @@
           giphyList: [],
         },
         methods: {
-          loadGiphies: function () {
+          loadGiphies: function (batchSize) {
             this.loading = true;
             axios
-              .get(`${TRENDING_URL}&limit=${LOAD_BATCH_SIZE}&offset=${this.offset}`)
+              .get(`${TRENDING_URL}&limit=${batchSize}&offset=${this.offset}`)
               .then(response => {
                 response.data.data.forEach(giphy => {
                   if (this.giphyList.length < MAX_VIEWABLE && !this.existingIds.has(giphy.id)) {
                     this.giphyList.push(giphy);
                   }
                 })
-                this.offset += LOAD_BATCH_SIZE;
+                this.offset += batchSize;
                 this.loading = false;
               })
               .catch(error => {
-                // TODO: handle errors
                 this.loading = false;
               })
           },
+          moreGiphies: function () {
+            this.loadGiphies(LOAD_BATCH_SIZE);
+          }
         },
         computed: {
           existingIds: function () {
@@ -113,13 +115,7 @@
           }
         },
         mounted () {
-          this.loading = true;
-          axios
-            .get(`${TRENDING_URL}&limit=${START_BATCH_SIZE}`)
-            .then(response => {
-              this.giphyList = response.data.data;
-              this.loading = false;
-            })
+          this.loadGiphies(START_BATCH_SIZE);
         }
       })
     </script>
