@@ -40,6 +40,9 @@
         font-size: 1rem;
         border-radius: 4px;
       }
+      .giphy-item {
+        background-color: #eee;
+      }
     </style>
   </head>
   <body>
@@ -103,7 +106,16 @@
 
       Vue.component('giphy-item', {
         props: ['item'],
-        template: '<a :href="item.url" target="blank"><img :src="item.images.fixed_height.url" /></a>'
+        template: `
+          <a :href="item.url" target="blank">
+            <img
+              class="giphy-item"
+              :src="item.images.fixed_height.url"
+              :width="item.images.fixed_height.width"
+              :height="item.images.fixed_height.height"
+            />
+          </a>
+        `
       })
 
       var app = new Vue({
