@@ -73,8 +73,24 @@
     <script type="text/javascript">
       const START_BATCH_SIZE = 10;
       const LOAD_BATCH_SIZE = 5;
-      const API_KEY = 'YfKFvEqlqmymcVI88PMbrlzG8QwAoIhh';
-      const TRENDING_URL = `https://api.giphy.com/v1/gifs/trending?api_key=${API_KEY}`;
+
+
+      class GiphyFetcher {
+        constructor() {
+          this.currentOffset = 0;
+        }
+
+        fetch(batchSize) {
+          return axios
+            .get("https://api.giphy.com/v1/gifs/trending?api_key=YfKFvEqlqmymcVI88PMbrlzG8QwAoIhh" +
+                 `&limit=${batchSize}&offset=${this.currentOffset}`)
+            .then(response => {
+              this.currentOffset += batchSize;
+              return response;
+            })
+        }
+      }
+      const giphyFetcher = new GiphyFetcher();
 
 
       class GiphyCollection {
@@ -121,18 +137,16 @@
       var app = new Vue({
         el: '#app',
         data: {
-          offset: START_BATCH_SIZE,
           loading: false,
           giphies: new GiphyCollection(),
         },
         methods: {
           loadGiphies: function (batchSize) {
             this.loading = true;
-            axios
-              .get(`${TRENDING_URL}&limit=${batchSize}&offset=${this.offset}`)
+
+            giphyFetcher.fetch(batchSize)
               .then(response => {
                 this.giphies.add(response.data.data);
-                this.offset += batchSize;
                 this.loading = false;
               })
               .catch(error => {
