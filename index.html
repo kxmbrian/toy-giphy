@@ -91,7 +91,7 @@
          */
         add(giphies) {
           giphies.forEach(giphy => {
-            if (this.list.length < this.MAX_VIEWABLE && !this.existingIds.has(giphy.id)) {
+            if (!this.isLimitReached() && !this.existingIds.has(giphy.id)) {
               this.list.push(giphy);
               this.existingIds.add(giphy.id);
             }
