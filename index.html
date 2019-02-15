@@ -73,6 +73,7 @@
     <script type="text/javascript">
       const START_BATCH_SIZE = 10;
       const LOAD_BATCH_SIZE = 5;
+      const MAX_VIEWABLE = 100;
 
       class Giphy {
         constructor(data) {
@@ -87,8 +88,8 @@
 
 
       class GiphyCollection {
-        constructor() {
-          this.MAX_VIEWABLE = 100;
+        constructor(limit) {
+          this.limit = limit;
           this.list = [];
           this.existingIds = new Set();
           this.currentOffset = 0;
@@ -109,7 +110,7 @@
         }
 
         isLimitReached() {
-          return this.list.length >= this.MAX_VIEWABLE;
+          return this.list.length >= this.limit;
         }
 
         fetch(batchSize) {
@@ -143,7 +144,7 @@
         el: '#app',
         data: {
           loading: false,
-          giphies: new GiphyCollection(),
+          giphies: new GiphyCollection(MAX_VIEWABLE),
         },
         methods: {
           loadGiphies: function (batchSize) {
