@@ -50,9 +50,9 @@
       <div id="title">Trending on GIPHY</div>
       <div id="gifs">
         <giphy-item
-          v-for="item in giphies.list"
-          :item="item"
-          :key="item.id"
+          v-for="giphy in giphies.list"
+          :giphy="giphy"
+          :key="giphy.id"
         />
       </div>
       <div id="footer">
@@ -93,6 +93,18 @@
       const giphyFetcher = new GiphyFetcher();
 
 
+      class Giphy {
+        constructor(data) {
+          const DEFAULT_IMG_TYPE = 'fixed_height';
+
+          this._data = data;
+          this.id = data.id;
+          this.link = data.url;
+          this.image = data.images[DEFAULT_IMG_TYPE];
+        }
+      }
+
+
       class GiphyCollection {
         constructor() {
           this.MAX_VIEWABLE = 100;
@@ -101,15 +113,15 @@
         }
 
         /**
-         * Adds a list of giphies to collection if they are new and limit is not reached.
+         * Adds a array of giphies to collection if they are new and limit is not reached.
          *
-         * @param {Array} giphies Giphies to add.
+         * @param {Object[]} giphies Array of Objects containing the raw data for each new giphy.
          */
         add(giphies) {
-          giphies.forEach(giphy => {
-            if (!this.isLimitReached() && !this.existingIds.has(giphy.id)) {
-              this.list.push(giphy);
-              this.existingIds.add(giphy.id);
+          giphies.forEach(giphyData => {
+            if (!this.isLimitReached() && !this.existingIds.has(giphyData.id)) {
+              this.list.push(new Giphy(giphyData));
+              this.existingIds.add(giphyData.id);
             }
           })
         }
@@ -121,14 +133,14 @@
 
 
       Vue.component('giphy-item', {
-        props: ['item'],
+        props: ['giphy'],
         template: `
-          <a :href="item.url" target="blank">
+          <a :href="giphy.link" target="blank">
             <img
               class="giphy-item"
-              :src="item.images.fixed_height.url"
-              :width="item.images.fixed_height.width"
-              :height="item.images.fixed_height.height"
+              :src="giphy.image.url"
+              :width="giphy.image.width"
+              :height="giphy.image.height"
             />
           </a>
         `
