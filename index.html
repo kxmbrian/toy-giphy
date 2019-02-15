@@ -47,7 +47,7 @@
       <div id="title">Trending on GIPHY</div>
       <div id="gifs">
         <giphy-item
-          v-for="item in giphyList"
+          v-for="item in giphies.list"
           :item="item"
           :key="item.id"
         />
@@ -55,7 +55,7 @@
       <div id="footer">
         <button
           id="add-more-button"
-          v-if="giphyList.length < maxViewable"
+          v-if="!giphies.isLimitReached()"
           @click="moreGiphies"
           :disabled='loading'
         >
@@ -70,9 +70,36 @@
     <script type="text/javascript">
       const START_BATCH_SIZE = 10;
       const LOAD_BATCH_SIZE = 5;
-      const MAX_VIEWABLE = 100;
       const API_KEY = 'YfKFvEqlqmymcVI88PMbrlzG8QwAoIhh';
       const TRENDING_URL = `https://api.giphy.com/v1/gifs/trending?api_key=${API_KEY}`;
+
+
+      class GiphyCollection {
+        constructor() {
+          this.MAX_VIEWABLE = 100;
+          this.list = [];
+          this.existingIds = new Set();
+        }
+
+        /**
+         * Adds a list of giphies to collection if they are new and limit is not reached.
+         *
+         * @param {Array} giphies Giphies to add.
+         */
+        add(giphies) {
+          giphies.forEach(giphy => {
+            if (this.list.length < this.MAX_VIEWABLE && !this.existingIds.has(giphy.id)) {
+              this.list.push(giphy);
+              this.existingIds.add(giphy.id);
+            }
+          })
+        }
+
+        isLimitReached() {
+          return this.list.length >= this.MAX_VIEWABLE;
+        }
+      }
+
 
       Vue.component('giphy-item', {
         props: ['item'],
@@ -83,9 +110,8 @@
         el: '#app',
         data: {
           offset: START_BATCH_SIZE,
-          maxViewable: MAX_VIEWABLE,
           loading: false,
-          giphyList: [],
+          giphies: new GiphyCollection(),
         },
         methods: {
           loadGiphies: function (batchSize) {
@@ -93,11 +119,7 @@
             axios
               .get(`${TRENDING_URL}&limit=${batchSize}&offset=${this.offset}`)
               .then(response => {
-                response.data.data.forEach(giphy => {
-                  if (this.giphyList.length < MAX_VIEWABLE && !this.existingIds.has(giphy.id)) {
-                    this.giphyList.push(giphy);
-                  }
-                })
+                this.giphies.add(response.data.data);
                 this.offset += batchSize;
                 this.loading = false;
               })
@@ -107,11 +129,6 @@
           },
           moreGiphies: function () {
             this.loadGiphies(LOAD_BATCH_SIZE);
-          }
-        },
-        computed: {
-          existingIds: function () {
-            return new Set(this.giphyList.map(giphy => giphy.id));
           }
         },
         mounted () {
